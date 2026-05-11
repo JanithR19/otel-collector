@@ -1,23 +1,24 @@
 receivers:
   otlp:
     protocols:
+      # We bind to 0.0.0.0 so Railway internal services can reach this
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
+        endpoint: 0.0.0.0:4318
 
 processors:
   batch:
 
 exporters:
-  # Standard Prometheus exporter
   prometheus:
     endpoint: "0.0.0.0:8889"
   
-  # Sending Logs to Loki via OTLP/HTTP (Native Loki support)
-  otlphttp/loki:
+  # Note the change from otlphttp to otlp_http
+  otlp_http/loki:
     endpoint: "http://${LOKI_ENDPOINT}/otlp"
   
-  # Sending Traces to Tempo via OTLP/HTTP
-  otlphttp/tempo:
+  otlp_http/tempo:
     endpoint: "http://${TEMPO_ENDPOINT}"
 
 service:
@@ -25,7 +26,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlphttp/tempo]
+      exporters: [otlp_http/tempo]
     metrics:
       receivers: [otlp]
       processors: [batch]
@@ -33,4 +34,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlphttp/loki]
+      exporters: [otlp_http/loki]
