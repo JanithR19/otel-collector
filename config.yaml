@@ -1,0 +1,33 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  loki:
+    # Uses the variable LOKI_ENDPOINT set in Railway
+    endpoint: "http://${LOKI_ENDPOINT}/loki/api/v1/push"
+  otlphttp/tempo:
+    # Uses the variable TEMPO_ENDPOINT set in Railway
+    endpoint: "http://${TEMPO_ENDPOINT}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/tempo]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [loki]
