@@ -8,13 +8,16 @@ processors:
   batch:
 
 exporters:
+  # Standard Prometheus exporter
   prometheus:
     endpoint: "0.0.0.0:8889"
-  loki:
-    # Uses the variable LOKI_ENDPOINT set in Railway
-    endpoint: "http://${LOKI_ENDPOINT}/loki/api/v1/push"
+  
+  # Sending Logs to Loki via OTLP/HTTP (Native Loki support)
+  otlphttp/loki:
+    endpoint: "http://${LOKI_ENDPOINT}/otlp"
+  
+  # Sending Traces to Tempo via OTLP/HTTP
   otlphttp/tempo:
-    # Uses the variable TEMPO_ENDPOINT set in Railway
     endpoint: "http://${TEMPO_ENDPOINT}"
 
 service:
@@ -30,4 +33,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [loki]
+      exporters: [otlphttp/loki]
